@@ -14,8 +14,7 @@ export async function onBoard() {
 
   const email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
 
-  console.log(email)
-  console.log(clerkUser)
+
 
   return  prisma.user.upsert({
     where: { clerkId: clerkUser.id },
