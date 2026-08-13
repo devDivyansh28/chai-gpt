@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server"
 import {convertToModelMessages, createIdGenerator, createUIMessageStreamResponse, streamText, toUIMessageStream, type UIMessage} from "ai"
 import { loadChatMessages , saveChatMessages } from "@/features/ai/actions/chat-store";
 import { getChatModel } from "@/features/ai/utils/getChatModel";
-import { tr } from "zod/v4/locales";
+
 
 
 

@@ -3,7 +3,7 @@ import {revalidatePath} from "next/cache";
 import { requireUser } from "@/features/auth/action/require-user";
 import { prisma } from "@/lib/db";
 import type { MessageRole } from "@/lib/generated/prisma/client";
-import {trim, z} from "zod"
+
 
 export type MessageItem = {
     id : string;
@@ -124,7 +124,7 @@ export async function deleteMessage(messageId : string){
         include : {conversation : true}
     })
 
-    if(!existing || existing.conversation.id !== user.id){
+    if(!existing || existing.conversation.userId !== user.id){
         throw new Error("Message Not found")
     }
 

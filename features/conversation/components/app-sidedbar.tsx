@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   MoreHorizontalIcon,
+  MoonIcon,
   PencilIcon,
   PinIcon,
   PinOffIcon,
   PlusIcon,
+  SunIcon,
   Trash2Icon,
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
@@ -237,14 +239,15 @@ function SidebarFooterMenu() {
           type="button"
           variant="ghost"
           size="sm"
-          className="w-full justify-start"
+          className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
         >
-          Toggle theme
+          {resolvedTheme === "dark" ? <SunIcon className="size-4 shrink-0" /> : <MoonIcon className="size-4 shrink-0" />}
+          <span className="group-data-[collapsible=icon]:hidden">Toggle theme</span>
         </Button>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <div className="flex items-center gap-2 px-1 py-1.5">
+        <div className="flex items-center gap-2 px-1 py-1.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
           <UserButton
             appearance={{
               elements: {

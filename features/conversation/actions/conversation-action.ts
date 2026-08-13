@@ -54,7 +54,7 @@ export async function listConversations() : Promise<ConversationListItem[]>{
     })
 }
 
-export async function createConversation(title="new chat"){
+export async function createConversation(title = ""){
     const user = await requireUser();
 
     return prisma.conversation.create({
