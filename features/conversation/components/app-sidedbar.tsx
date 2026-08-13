@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import {
+  BotMessageSquare,
   MoreHorizontalIcon,
   MoonIcon,
   PencilIcon,
@@ -12,6 +13,7 @@ import {
   SquarePenIcon,
   SunIcon,
   Trash2Icon,
+  MessageSquareIcon,
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
@@ -37,6 +39,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,6 +63,7 @@ type Conversation = NonNullable<
 export function AppSidebar() {
   const pathname = usePathname();
   const { data: conversations, isLoading } = useConversations();
+  const { setOpen } = useSidebar();
 
   // Get the active conversation id from the pathname (e.g. /c/123)
   // pathname.split("/")[2] is the third part of the pathname (the conversation id)
@@ -71,22 +76,23 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" variant="inset">
       <SidebarHeader className="gap-2">
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem className="flex items-center group-data-[collapsible=icon]:justify-center">
             <SidebarMenuButton
               size="lg"
-              className="font-semibold tracking-tight"
+              className="font-semibold tracking-tight w-auto group-data-[collapsible=icon]:hidden"
               render={<Link href="/" />}
             >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm text-primary-foreground">
-                
-              </span>
-              <span className="group-data-[collapsible=icon]:hidden">ChaiGPT</span>
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm text-primary-foreground">
+                <BotMessageSquare className="size-5" />
+              </div>
+              <span className="truncate">ChitChat</span>
             </SidebarMenuButton>
+            <SidebarTrigger className="ml-auto group-data-[collapsible=icon]:ml-0" />
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="New chat" variant="outline" className="mt-1 bg-foreground text-background hover:bg-foreground/90 hover:text-background border-transparent shadow-sm" render={<Link href="/" />}>
+            <SidebarMenuButton tooltip="New chat" variant="outline" render={<Link href="/" />}>
               <SquarePenIcon />
-              <span className="group-data-[collapsible=icon]:hidden">New chat</span>
+              <span>New chat</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -96,7 +102,14 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Recent Chats" onClick={() => setOpen(true)}>
+                  <MessageSquareIcon />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+            <SidebarMenu className="group-data-[collapsible=icon]:hidden">
               <ChatList
                 conversations={conversations}
                 isLoading={isLoading}
@@ -285,16 +298,10 @@ function SidebarFooterMenu() {
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton tooltip="Account" render={<div />}>
-          <div className="shrink-0 flex items-center justify-center">
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: "size-6",
-                },
-              }}
-            />
+          <div className="flex items-center justify-center w-full max-w-[28px]">
+            <UserButton />
           </div>
-          <span className="truncate text-sm text-muted-foreground group-data-[collapsible=icon]:hidden">
+          <span className="truncate text-sm text-muted-foreground group-data-[collapsible=icon]:hidden pl-2">
             Account
           </span>
         </SidebarMenuButton>

@@ -19,7 +19,7 @@ export async function POST(req : Request){
 
   const user = await requireUser();
 
- const conversation = await prisma.conversation.findFirst({
+ let conversation = await prisma.conversation.findFirst({
   where : {
     id,
     userId : user.id
@@ -27,7 +27,13 @@ export async function POST(req : Request){
  })
 
  if(!conversation){
-  return new Response("Conversation not found" , {status : 404})
+  conversation = await prisma.conversation.create({
+    data: {
+      id,
+      userId: user.id,
+      title: "New Chat",
+    }
+  });
  }
 
  const previousMessages = await loadChatMessages(id);
@@ -44,7 +50,7 @@ export async function POST(req : Request){
 
  const result =  streamText({
   model : getChatModel(conversation.model),
-  system : conversation.systemPrompt ?? "You are ChaiGpt , a helpful ai assitant",
+  system : conversation.systemPrompt ?? "You are ChitChat , a helpful ai assitant",
   messages : await convertToModelMessages(messages),
  })
  

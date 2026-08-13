@@ -1,12 +1,15 @@
-import { startNewChat } from '@/features/home/action/start-new-chat'
-import { redirect } from 'next/navigation';
+import { ConversationView } from "@/features/conversation/components/conversation-view";
 import React from 'react'
 
 const page = async () => {
-
-  const conversationId = await startNewChat();
+  const newId = crypto.randomUUID();
   
-  redirect(`/c/${conversationId}`)
+  return (
+    <ConversationView
+      conversationId={newId}
+      initialMessages={[]}
+    />
+  )
 }
 
 export default page

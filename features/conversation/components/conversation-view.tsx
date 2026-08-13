@@ -1,6 +1,7 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ChevronDownIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
@@ -58,26 +59,37 @@ export const ConversationView = ({
     conversations?.find((item) => item.id === conversationId)?.title ?? "Chat";
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b px-3">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="mx-1 h-4" />
-        <h1 className="truncate text-sm font-medium">{title}</h1>
+    <div className="flex h-full w-full flex-col relative overflow-hidden bg-background">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b px-4 bg-transparent z-20">
+        <div className="flex items-center gap-2">
+          <h1 className="truncate text-sm font-medium">{title}</h1>
+          <ChevronDownIcon className="size-4 text-muted-foreground" />
+        </div>
       </header>
 
-      {messages.length === 0 ? (
-        <ChatEmpty />
-      ) : (
-        <ChatMessages messages={messages} status={status} />
-      )}
+      <div className="flex-1 min-h-0 overflow-y-auto w-full relative z-0">
+        {messages.length === 0 ? (
+          <ChatEmpty />
+        ) : (
+          <ChatMessages messages={messages} status={status} />
+        )}
+        <div className="h-40" />
+      </div>
 
-      <ChatComposer
-        onSend={(text) => {
-          void sendMessage({ text });
-        }}
-        isSending={status !== "ready"}
-        autoFocus
-      />
+      <div className="absolute bottom-0 w-full px-4 pb-4 pt-8 bg-gradient-to-t from-background via-background/90 to-transparent z-10 pointer-events-none">
+        <div className="max-w-3xl mx-auto w-full pointer-events-auto">
+          <ChatComposer
+            onSend={(text) => {
+              void sendMessage({ text });
+              if (window.location.pathname === "/") {
+                window.history.replaceState(null, "", `/c/${conversationId}`);
+              }
+            }}
+            isSending={status !== "ready"}
+            autoFocus
+          />
+        </div>
+      </div>
     </div>
   );
 };

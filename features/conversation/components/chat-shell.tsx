@@ -5,9 +5,9 @@ import { SidebarInset , SidebarProvider } from "@/components/ui/sidebar"
 
 export function ChatShell({children} : {children : React.ReactNode}){
     return (
-        <SidebarProvider>
+        <SidebarProvider className="h-svh overflow-hidden">
             <AppSidebar/>
-            <SidebarInset className="min-h-svh flex flex-col">
+            <SidebarInset className="h-full flex flex-col overflow-hidden">
                 {children}
             </SidebarInset>
         </SidebarProvider>

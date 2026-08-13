@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { ArrowUpIcon } from "lucide-react";
+import { ArrowUpIcon, PlusIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import {
   InputGroup,
@@ -26,7 +27,7 @@ type ChatComposerProps = {
 export function ChatComposer({
   onSend,
   isSending = false,
-  placeholder = "Message ChaiGPT…",
+  placeholder = "Message ChitChat…",
   className,
   autoFocus = false,
 }: ChatComposerProps) {
@@ -63,35 +64,33 @@ export function ChatComposer({
   return (
     <form
       onSubmit={(event) => void handleSubmit(event)}
-      className={cn("mx-auto w-full max-w-3xl px-4 pb-4 md:px-6", className)}
+      className={cn("w-full", className)}
     >
-      <InputGroup className="h-auto min-h-14 rounded-3xl border-border/80 bg-background shadow-sm dark:bg-input/40">
+      <InputGroup className="h-auto min-h-[52px] rounded-[26px] border border-border bg-muted/60 focus-within:bg-background focus-within:border-primary transition-colors shadow-sm p-2.5 items-end">
+        <Button type="button" variant="ghost" size="icon" className="rounded-full size-8 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary">
+          <PlusIcon className="size-5" />
+        </Button>
         <InputGroupTextarea
           ref={textareaRef}
           value={value}
           onChange={(event) => setValue(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder="Write a message..."
           disabled={isSending}
           rows={1}
-          className="max-h-48 min-h-12 py-3.5 pl-4 text-[15px] leading-relaxed"
+          className="max-h-48 min-h-[32px] py-1 px-3 text-[15px] leading-relaxed text-foreground placeholder:text-muted-foreground border-none bg-transparent focus-visible:ring-0 resize-none shadow-none"
         />
-        <InputGroupAddon align="inline-end" className="pr-2 pb-2 self-end">
-          <InputGroupButton
-            type="submit"
-            size="icon-sm"
-            variant="default"
-            disabled={!canSend}
-            className="size-9 rounded-full"
-            aria-label="Send message"
-          >
-            {isSending ? <Spinner /> : <ArrowUpIcon />}
-          </InputGroupButton>
-        </InputGroupAddon>
+        <InputGroupButton
+          type="submit"
+          size="icon-sm"
+          variant="ghost"
+          disabled={!canSend}
+          className={cn("size-8 shrink-0 rounded-full transition-colors", canSend ? "bg-foreground text-background hover:opacity-90" : "bg-muted text-muted-foreground")}
+          aria-label="Send message"
+        >
+          {isSending ? <Spinner /> : <ArrowUpIcon className="size-[18px]" strokeWidth={2.5} />}
+        </InputGroupButton>
       </InputGroup>
-      <p className="mt-2 text-center text-xs text-muted-foreground">
-        ChaiGPT can make mistakes. Check important info.
-      </p>
     </form>
   );
 }
