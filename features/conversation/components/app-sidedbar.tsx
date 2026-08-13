@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import * as React from "react";
 import {
   MoreHorizontalIcon,
   MoonIcon,
   PencilIcon,
   PinIcon,
   PinOffIcon,
-  PlusIcon,
+  SquarePenIcon,
   SunIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -77,14 +78,14 @@ export function AppSidebar() {
               render={<Link href="/" />}
             >
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm text-primary-foreground">
-                C
+                
               </span>
               <span className="group-data-[collapsible=icon]:hidden">ChaiGPT</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="New chat" render={<Link href="/" />}>
-              <PlusIcon />
+            <SidebarMenuButton tooltip="New chat" variant="outline" className="mt-1 bg-foreground text-background hover:bg-foreground/90 hover:text-background border-transparent shadow-sm" render={<Link href="/" />}>
+              <SquarePenIcon />
               <span className="group-data-[collapsible=icon]:hidden">New chat</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -93,7 +94,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Chats</SidebarGroupLabel>
+          <SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <ChatList
@@ -155,7 +156,6 @@ function ChatList({
   );
 }
 
-/** Single sidebar row for a conversation with rename, pin, and delete actions. */
 function ChatItem({
   conversation,
   isActive,
@@ -168,62 +168,102 @@ function ChatItem({
     isActive ? conversation.id : undefined,
   );
 
-  /** Prompts the user to rename the conversation and persists the new title. */
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editValue, setEditValue] = React.useState(conversation.title);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
+
   function handleRename() {
-    const next = window.prompt("Rename chat", conversation.title);
-    if (!next || next.trim() === conversation.title) return;
-    updateConversation.mutate({ id: conversation.id, title: next });
+    setIsEditing(true);
+    setEditValue(conversation.title);
+  }
+
+  function submitRename() {
+    setIsEditing(false);
+    if (!editValue || editValue.trim() === conversation.title) {
+      setEditValue(conversation.title);
+      return;
+    }
+    updateConversation.mutate({ id: conversation.id, title: editValue.trim() });
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      submitRename();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+      setEditValue(conversation.title);
+    }
   }
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         isActive={isActive}
-        tooltip={conversation.title}
-        render={<Link href={`/c/${conversation.id}`} />}
+        tooltip={isEditing ? undefined : conversation.title}
+        render={isEditing ? <div /> : <Link href={`/c/${conversation.id}`} />}
         className={cn(isActive && "font-medium")}
       >
-        <span className="truncate">{conversation.title}</span>
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={submitRename}
+            onKeyDown={handleKeyDown}
+            className="w-full bg-transparent outline-none ring-0 text-sm"
+          />
+        ) : (
+          <span className="truncate">{conversation.title}</span>
+        )}
       </SidebarMenuButton>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <SidebarMenuAction
-              showOnHover
-              className="data-popup-open:bg-sidebar-accent"
-            />
-          }
-        >
-          <MoreHorizontalIcon />
-          <span className="sr-only">Chat actions</span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" align="start">
-          <DropdownMenuItem onClick={handleRename}>
-            <PencilIcon />
-            Rename
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              updateConversation.mutate({
-                id: conversation.id,
-                isPinned: !conversation.isPinned,
-              })
+      {!isEditing && (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <SidebarMenuAction
+                showOnHover
+                className="data-popup-open:bg-sidebar-accent"
+              />
             }
           >
-            {conversation.isPinned ? <PinOffIcon /> : <PinIcon />}
-            {conversation.isPinned ? "Unpin" : "Pin"}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => deleteConversation.mutate(conversation.id)}
-          >
-            <Trash2Icon />
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <MoreHorizontalIcon />
+            <span className="sr-only">Chat actions</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="right" align="start">
+            <DropdownMenuItem onClick={handleRename}>
+              <PencilIcon />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                updateConversation.mutate({
+                  id: conversation.id,
+                  isPinned: !conversation.isPinned,
+                })
+              }
+            >
+              {conversation.isPinned ? <PinOffIcon /> : <PinIcon />}
+              {conversation.isPinned ? "Unpin" : "Pin"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => deleteConversation.mutate(conversation.id)}
+            >
+              <Trash2Icon />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </SidebarMenuItem>
   );
 }

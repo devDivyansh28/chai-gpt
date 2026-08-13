@@ -52,16 +52,48 @@ export function useUpdateConversation() {
       isPinned?: boolean;
       isArchived?: boolean;
     }) => updateConversation(id, data),
-    onSuccess: (conversation) => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.conversations.all });
+      const previousConversations = queryClient.getQueryData<any[]>(queryKeys.conversations.all);
+
+      if (previousConversations) {
+        const updatedConversations = previousConversations.map((conv) => {
+          if (conv.id === variables.id) {
+            return { ...conv, ...variables };
+          }
+          return conv;
+        });
+
+        if (variables.isPinned !== undefined) {
+          updatedConversations.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            const dateA = new Date(a.lastMessageAt || 0).getTime();
+            const dateB = new Date(b.lastMessageAt || 0).getTime();
+            return dateB - dateA;
+          });
+        }
+
+        queryClient.setQueryData(queryKeys.conversations.all, updatedConversations);
+      }
+
+      return { previousConversations };
+    },
+    onError: (error: Error, variables, context) => {
+      if (context?.previousConversations) {
+        queryClient.setQueryData(queryKeys.conversations.all, context.previousConversations);
+      }
+      toast.error(error.message || "Could not update chat");
+    },
+    onSettled: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.conversations.all,
       });
+    },
+    onSuccess: (conversation) => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.conversations.detail(conversation.id),
       });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Could not update chat");
     },
   });
 }
@@ -73,10 +105,29 @@ export function useDeleteConversation(activeId?: string) {
 
   return useMutation({
     mutationFn: (id: string) => deleteConversation(id),
-    onSuccess: ({ id }) => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.conversations.all });
+      const previousConversations = queryClient.getQueryData<any[]>(queryKeys.conversations.all);
+
+      if (previousConversations) {
+        const updatedConversations = previousConversations.filter((conv) => conv.id !== id);
+        queryClient.setQueryData(queryKeys.conversations.all, updatedConversations);
+      }
+
+      return { previousConversations };
+    },
+    onError: (error: Error, id, context) => {
+      if (context?.previousConversations) {
+        queryClient.setQueryData(queryKeys.conversations.all, context.previousConversations);
+      }
+      toast.error(error.message || "Could not delete chat");
+    },
+    onSettled: () => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.conversations.all,
       });
+    },
+    onSuccess: ({ id }) => {
       queryClient.removeQueries({
         queryKey: queryKeys.messages.byConversation(id),
       });
@@ -86,9 +137,6 @@ export function useDeleteConversation(activeId?: string) {
       }
 
       toast.success("Chat deleted");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Could not delete chat");
     },
   });
 }
