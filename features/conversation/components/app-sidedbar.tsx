@@ -76,16 +76,16 @@ export function AppSidebar() {
               className="font-semibold tracking-tight"
               render={<Link href="/" />}
             >
-              <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm text-primary-foreground">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm text-primary-foreground">
                 C
               </span>
-              <span>ChaiGPT</span>
+              <span className="group-data-[collapsible=icon]:hidden">ChaiGPT</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="New chat" render={<Link href="/" />}>
               <PlusIcon />
-              <span>New chat</span>
+              <span className="group-data-[collapsible=icon]:hidden">New chat</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -235,30 +235,29 @@ function SidebarFooterMenu() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+        <SidebarMenuButton
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+          tooltip="Toggle theme"
         >
-          {resolvedTheme === "dark" ? <SunIcon className="size-4 shrink-0" /> : <MoonIcon className="size-4 shrink-0" />}
+          {resolvedTheme === "dark" ? <SunIcon /> : <MoonIcon />}
           <span className="group-data-[collapsible=icon]:hidden">Toggle theme</span>
-        </Button>
+        </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <div className="flex items-center gap-2 px-1 py-1.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "size-8",
-              },
-            }}
-          />
+        <SidebarMenuButton tooltip="Account" render={<div />}>
+          <div className="shrink-0 flex items-center justify-center">
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "size-6",
+                },
+              }}
+            />
+          </div>
           <span className="truncate text-sm text-muted-foreground group-data-[collapsible=icon]:hidden">
             Account
           </span>
-        </div>
+        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   );
